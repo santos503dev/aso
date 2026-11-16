@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía Técnica y Soluciones | Portal Informativo</title>
+    <style>
+        /* =========================================
+           VARIABLES Y CONFIGURACIÓN BASE
+           ========================================= */
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --accent: #38bdf8;
+            --accent-hover: #0284c7;
+            --border-color: #475569;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* =========================================
+           HEADER Y NAVEGACIÓN PRINCIPAL
+           ========================================= */
+        header {
+            background-color: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--accent);
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+
+        .logo span {
+            color: var(--text-primary);
+        }
+
+        /* Menú de navegación superior con subrayado dinámico */
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            position: relative;
+            padding: 0.5rem 0;
+            transition: var(--transition);
+        }
+
+        nav a:hover {
+            color: var(--accent);
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--accent);
+            transition: var(--transition);
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        /* =========================================
+           CONTENEDOR PRINCIPAL Y MENÚ DINÁMICO (TABS)
+           ========================================= */
+        main {
+            flex: 1;
+            max-width: 1100px;
+            width: 90%;
+            margin: 3rem auto;
+        }
+
+        .hero-intro {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .hero-intro h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, var(--text-primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-intro p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 650px;
+            margin: 0 auto;
+        }
+
+        /* Ocultamos los radio buttons nativos */
+        .tab-radio {
+            display: none;
+        }
+
+        /* Barra de botones del menú dinámico */
+        .dynamic-menu {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+            flex-wrap: wrap;
+            background: var(--bg-secondary);
+            padding: 0.75rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .tab-label {
+            padding: 0.75rem 1.75rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-secondary);
+            transition: var(--transition);
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tab-label:hover {
+            background-color: rgba(56, 189, 248, 0.1);
+            color: var(--text-primary);
+        }
+
+        /* Estilo activo dinámico según el radio seleccionado */
+        #tab-info:checked ~ .dynamic-menu label[for="tab-info"],
+        #tab-problemas:checked ~ .dynamic-menu label[for="tab-problemas"],
+        #tab-soluciones:checked ~ .dynamic-menu label[for="tab-soluciones"] {
+            background-color: var(--accent);
+            color: var(--bg-primary);
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.35);
+        }
+
+        /* Paneles de contenido */
+        .tab-content {
+            display: none;
+            background-color: var(--bg-secondary);
+            padding: 2.5rem;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Mostrar el panel correspondiente al radio activo */
+        #tab-info:checked ~ .panels-container #panel-info,
+        #tab-problemas:checked ~ .panels-container #panel-problemas,
+        #tab-soluciones:checked ~ .panels-container #panel-soluciones {
+            display: block;
+        }
+
+        /* =========================================
+           ESTILOS INTERNOS DE CADA SECCIÓN
+           ========================================= */
+        .section-title {
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--border-color);
+            color: var(--accent);
+        }
+
+        .grid-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--accent);
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        .card h3 {
+            margin-bottom: 0.75rem;
+            font-size: 1.2rem;
+            color: var(--text-primary);
+        }
+
+        .card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Variantes de tarjetas para Problemas y Soluciones */
+        .card.problem {
+            border-left-color: var(--warning);
+        }
+
+        .card.solution {
+            border-left-color: var(--success);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.6rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border-radius: 4px;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+        }
+
+        .badge-warn {
+            background-color: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+
+        .badge-ok {
+            background-color: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        /* Acordeón CSS puro dentro de soluciones */
+        details {
+            background-color: var(--bg-card);
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        details[open] {
+            border-color: var(--accent);
+        }
+
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: '+';
+            font-size: 1.4rem;
+            color: var(--accent);
+            transition: transform 0.2s;
+        }
+
+        details[open] summary::after {
+            content: '−';
+        }
+
+        details p {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        /* =========================================
+           FOOTER Y CONTACTO
+           ========================================= */
+        footer {
+            background-color: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 3rem 5% 1.5rem;
+            margin-top: auto;
+        }
+
+        .footer-grid {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-col h4 {
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .footer-col p, .footer-col li {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            list-style: none;
+        }
+
+        .footer-col a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-col a:hover {
+            text-decoration: underline;
+        }
+
+        .footer-bottom {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        /* =========================================
+           RESPONSIVE DESIGN
+           ========================================= */
+        @media (max-width: 680px) {
+            header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            nav ul {
+                gap: 1.25rem;
+            }
+
+            .hero-intro h1 {
+                font-size: 2rem;
+            }
+
+            .tab-content {
+                padding: 1.5rem;
+            }
+
+            .tab-label {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ENCABEZADO -->
+    <header>
+        <a href="#" class="logo">TEMA<span>BASE</span></a>
+        <nav>
+            <ul>
+                <li><a href="#inicio">Inicio</a></li>
+                <li><a href="#explorador">Explorar</a></li>
+                <li><a href="#contacto">Contacto</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main id="inicio">
+        <section class="hero-intro">
+            <h1>Base de Conocimiento: [Título de tu Tema]</h1>
+            <p>Explora los fundamentos esenciales, identifica los inconvenientes más frecuentes y aplica soluciones técnicas comprobadas desde un solo lugar.</p>
+        </section>
+
+        <!-- SISTEMA DE MENÚ DINÁMICO (CSS PURO) -->
+        <section id="explorador">
+            <!-- Controles ocultos de estado -->
+            <input type="radio" name="tabs" id="tab-info" class="tab-radio" checked>
+            <input type="radio" name="tabs" id="tab-problemas" class="tab-radio">
+            <input type="radio" name="tabs" id="tab-soluciones" class="tab-radio">
+
+            <!-- Botonera interactiva -->
+            <div class="dynamic-menu" role="tablist">
+                <label for="tab-info" class="tab-label" role="tab">📘 Información Básica</label>
+                <label for="tab-problemas" class="tab-label" role="tab">⚠️ Problemas Comunes</label>
+                <label for="tab-soluciones" class="tab-label" role="tab">✅ Soluciones y Guías</label>
+            </div>
+
+            <!-- Contenedor de vistas dinámicas -->
+            <div class="panels-container">
+                
+                <!-- PANEL 1: INFORMACIÓN BÁSICA -->
+                <article id="panel-info" class="tab-content">
+                    <h2 class="section-title">Información Básica y Fundamentos</h2>
+                    <p>En esta sección se detallan los conceptos clave necesarios para comprender el funcionamiento, la arquitectura y el propósito principal de <strong>[Nombre del Tema]</strong>.</p>
+                    
+                    <div class="grid-cards">
+                        <div class="card">
+                            <h3>1. ¿Qué es y cómo funciona?</h3>
+                            <p>Define aquí el concepto principal de tu tema. Explica de forma clara y directa cuál es su objetivo y por qué es relevante en su área de aplicación.</p>
+                        </div>
+                        <div class="card">
+                            <h3>2. Componentes Principales</h3>
+                            <p>Enumera las partes esenciales que integran este sistema o metodología, detallando cómo interactúan entre sí para lograr resultados óptimos.</p>
+                        </div>
+                        <div class="card">
+                            <h3>3. Requisitos y Buenas Prácticas</h3>
+                            <p>Describe las condiciones iniciales necesarias antes de comenzar y las recomendaciones estándar para mantener la estabilidad y eficiencia.</p>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- PANEL 2: PROBLEMAS -->
+                <article id="panel-problemas" class="tab-content">
+                    <h2 class="section-title">Diagnóstico de Problemas Frecuentes</h2>
+                    <p>Identificación de los fallos, cuellos de botella o errores de configuración que suelen presentarse durante la implementación o el uso diario.</p>
+
+                    <div class="grid-cards">
+                        <div class="card problem">
+                            <span class="badge badge-warn">Error Crítico</span>
+                            <h3>Fallo de Configuración Inicial</h3>
+                            <p><strong>Síntoma:</strong> El sistema no responde o arroja advertencias de incompatibilidad al iniciar.<br><strong>Causa:</strong> Parámetros mal asignados o dependencias faltantes.</p>
+                        </div>
+                        <div class="card problem">
+                            <span class="badge badge-warn">Rendimiento</span>
+                            <h3>Degradación o Lentitud</h3>
+                            <p><strong>Síntoma:</strong> Tiempos de respuesta elevados bajo carga normal.<br><strong>Causa:</strong> Falta de optimización en los recursos o acumulación de procesos en segundo plano.</p>
+                        </div>
+                        <div class="card problem">
+                            <span class="badge badge-warn">Conexión / Acceso</span>
+                            <h3>Bloqueo de Permisos</h3>
+                            <p><strong>Síntoma:</strong> Acceso denegado al intentar ejecutar tareas administrativas.<br><strong>Causa:</strong> Privilegios insuficientes en el perfil de usuario actual.</p>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- PANEL 3: SOLUCIONES -->
+                <article id="panel-soluciones" class="tab-content">
+                    <h2 class="section-title">Soluciones Paso a Paso</h2>
+                    <p>Haz clic sobre cada apartado para desplegar el procedimiento técnico de resolución.</p>
+                    <br>
+
+                    <details open>
+                        <summary>Solución 1: Restablecimiento y validación de parámetros</summary>
+                        <p>Verifica los archivos de configuración base, asegúrate de que las rutas y variables estén correctamente definidas y reinicia el servicio para aplicar los cambios limpios.</p>
+                    </details>
+
+                    <details>
+                        <summary>Solución 2: Optimización de recursos y limpieza de caché</summary>
+                        <p>Depura los archivos temporales acumulados, limita los procesos innecesarios al arranque y asigna memoria o ancho de banda prioritario a las tareas principales.</p>
+                    </details>
+
+                    <details>
+                        <summary>Solución 3: Ajuste de permisos y políticas de seguridad</summary>
+                        <p>Asigna los privilegios adecuados únicamente al grupo de trabajo necesario, evitando el uso constante de credenciales de superusuario para operaciones rutinarias.</p>
+                    </details>
+                </article>
+
+            </div>
+        </section>
+    </main>
+
+    <!-- PIE DE PÁGINA (FOOTER) -->
+    <footer id="contacto">
+        <div class="footer-grid">
+            <div class="footer-col">
+                <h4>Sobre este Portal</h4>
+                <p>Documentación técnica estructurada para consulta rápida. Diseñado bajo estándares web limpios con HTML5 y CSS3.</p>
+            </div>
+            
+            <div class="footer-col">
+                <h4>Navegación Rápida</h4>
+                <ul>
+                    <li><a href="#inicio">Volver arriba</a></li>
+                    <li><a href="#explorador">Panel de contenido</a></li>
+                    <li><a href="#contacto">Información de contacto</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4>Información de Contacto</h4>
+                <ul>
+                    <li><strong>Autor:</strong> Tu Nombre Completo</li>
+                    <li><strong>Correo:</strong> <a href="mailto:tu.correo@ejemplo.com">tu.correo@ejemplo.com</a></li>
+                    <li><strong>Teléfono:</strong> +503 0000-0000</li>
+                    <li><strong>Ubicación:</strong> Tu Ciudad, País</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2026 [Tu Nombre o Marca]. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
